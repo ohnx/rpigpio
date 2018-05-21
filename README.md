@@ -2,10 +2,11 @@
 
 GPIO control using a simple REST api!
 
-Be easy to use and don't use up too many resources.
+The goal of this project is to be easy to use and don't use up too many resources.
 Pre-built binaries are available on the releases tab, so you don't have to install `build-essential` and run `make`. :)
 
-I think this could be used on not just the raspberry pi, but my original use case was the Pi Zero W. You mileage with other boards may vary!
+I think this could be used on not just the raspberry pi, but my original use case was the Pi Zero W.
+Your mileage with other boards may vary!
 
 ## API
 

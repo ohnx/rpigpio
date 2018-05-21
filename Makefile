@@ -1,5 +1,5 @@
 CC ?= gcc
-CFLAGS = -I. -Wall -Werror
+CFLAGS = -I. -Wall -Werror -O3
 FILES = yhs.c rpigpio.c
 OUTPUT = rpigpio
 
