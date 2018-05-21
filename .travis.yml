@@ -1,11 +1,10 @@
-lang: c
+language: c
 before_install:
 - sudo apt install gcc-arm-linux-gnueabihf
 script:
 - make
 env:
-  - CC=arm-linux-gnueabihf-gcc
-  - CFLAGS=-std=c99
+  - CC=arm-linux-gnueabihf-gcc CFLAGS=-std=c99
 deploy:
   provider: releases
   api_key:
