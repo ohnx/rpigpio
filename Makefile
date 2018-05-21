@@ -1,14 +1,14 @@
 CC ?= gcc
-CFLAGS = -I. -Wall -Werror -ansi -pedantic
-FILES = libgpio.c rpigpio.c
+CFLAGS = -I. -Wall -Werror
+FILES = yhs.c rpigpio.c
 OUTPUT = rpigpio
 
-all: $(FILES) yhs.o
+all: $(FILES) libgpio.o
 	$(CC) $^ $(CFLAGS) -o $(OUTPUT)
 
-# needed because this file uses a painful number of non-ansi things like //
-yhs.o: yhs.c
-	$(CC) -I. -Wall -Werror $^ -c -o $@
+# libgpio.c is ansi C
+libgpio.o: libgpio.c
+	$(CC) -I. -Wall -Werror -ansi -pedantic $^ -c -o $@
 
 clean:
-	rm -rf yhs.o $(OUTPUT)
+	rm -rf libgpio.o $(OUTPUT)

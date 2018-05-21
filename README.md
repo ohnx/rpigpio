@@ -21,12 +21,45 @@ Returns the current status of `gpio` as plain text (`0` for off, or `1` for on).
 
 ### `POST /api/gpio/<gpio>` OR `PUT /api/gpio/<gpio>`
 
-Sets the status of `gpio` to a `status` (`0` for off, or `1` for on).
+Sets the status of `gpio` to request body (`0` for off, or `1` for on).
+Returns the new status of the gpio pin.
+
+e.g. request:
+
+```
+POST /api/gpio/2 HTTP/1.0
+User-Agent: Something/1.0
+Content-Type: text/plain
+Content-Length: 1
+
+1
+```
+
 
 ### `PATCH /api/gpio/<gpio>`
 
-Toggles the current status of `gpio` for `time` seconds (if gpio was on before, it will be off momentarily and vice versa).
-Responds after the entire toggle is complete; if you want a toggle greater than a few seconds, please use two requests of `PUT` instead.
+Toggles the current status of `gpio` for request body miliseconds (if gpio was on before, it will be off momentarily and vice versa).
+Responds the new status of the gpio pin after the entire toggle is complete; if you want a toggle greater than 2 seconds, please use two requests of `PUT` instead.
+(In fact, the request will return an error if the value is greater than 2000 or less than 0)
+
+```
+PATCH /api/gpio/2 HTTP/1.0
+User-Agent: Something/1.0
+Content-Type: text/plain
+Content-Length: 4
+
+1000
+```
+
+On error, 2 is returned.
+
+### Invalid input
+
+Only GPIO pins under 256 are supported. Invalid values will return a 404 error.
+
+### Errors
+
+Errors are logged to stderr on the server and will result in a value of 2 being returned.
 
 ## Running on boot
 
@@ -34,7 +67,12 @@ Responds after the entire toggle is complete; if you want a toggle greater than 
 
 ## Technical details
 
-This program relies on 
+This program relies on the sysfs interface to do stuff with GPIO pins.
+
+## TODO
+
+* Test the yhs server for common exploits, e.g. Content-Length is like 798457348957 but only send 10 bytes and vice versa
+* Check for memory leaks with yhs
 
 ## Credits and License
 
