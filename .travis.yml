@@ -1,13 +1,12 @@
 language: c
 before_install:
 - sudo apt install gcc-arm-linux-gnueabi gcc-arm-linux-gnueabihf
+- eval "CC=${ACTUAL_GCC}"
 script:
 - make
 env:
   - ACTUAL_GCC=arm-linux-gnueabi-gcc TARGET=gnueabi
   - ACTUAL_GCC=arm-linux-gnueabihf-gcc TARGET=gnueabihf
-before_install:
-    - eval "CC=${ACTUAL_GCC}"
 deploy:
   provider: releases
   api_key:
