@@ -99,7 +99,8 @@ enum yhsMethod
 	YHS_METHOD_GET=2,
 	YHS_METHOD_PUT=4,
 	YHS_METHOD_POST=8,
-	YHS_METHOD_HEAD=16,
+	YHS_METHOD_PATCH=16,
+	YHS_METHOD_HEAD=32,
 
 	// OK, sure, so "websocket" isn't really a method.
 	YHS_METHOD_WEBSOCKET=32,

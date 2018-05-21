@@ -1755,10 +1755,11 @@ static void debug_dump_string(yhsServer *server,const char *str,int max_len)
 
 static void handle_toc(yhsRequest *re)
 {
-	yhsHandler *h;
+	//yhsHandler *h;
 
-	yhs_begin_data_response(re,"text/html");
-	
+	yhs_begin_data_response(re,"text/plain");
+	yhs_text(re, "you're sending this request incorrectly...");
+	/*
 	yhs_textf(re,"<html>\n");
 	yhs_html_textf(re," <head><title>\a+%s\a- - Contents</title></head>\n",re->server->name);
 	yhs_textf(re," <body>\n");
@@ -1783,7 +1784,7 @@ static void handle_toc(yhsRequest *re)
 	}
 	
 	yhs_textf(re," </body>\n");
-	yhs_textf(re,"</html>\n");
+	yhs_textf(re,"</html>\n");*/
 }
 
 static const yhsHandler toc_handler={
@@ -2062,6 +2063,8 @@ static int accept_new_connections(yhsServer *server)
 			re.method=YHS_METHOD_PUT;
 		else if(strcmp(method,"POST")==0)
 			re.method=YHS_METHOD_POST;
+		else if(strcmp(method,"PATCH")==0)
+			re.method=YHS_METHOD_PATCH;
 		else
 			re.method=YHS_METHOD_OTHER;
 
@@ -3672,8 +3675,8 @@ yhsHandler *yhs_add_res_path_handler(yhsServer *server,const char *res_path,yhsR
     h->handler_fn=handler_fn;
     h->context=context;
 
-	// TODO: right decision? (probably...)
-	h->valid_methods=YHS_METHOD_GET|YHS_METHOD_HEAD;
+	// Yeah, handle all of the requests...
+	h->valid_methods=YHS_METHOD_GET|YHS_METHOD_PUT|YHS_METHOD_POST|YHS_METHOD_PATCH|YHS_METHOD_HEAD;
     
     for(prev=server->handlers.next;prev->handler_fn;prev=prev->next)
     {

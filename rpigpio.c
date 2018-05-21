@@ -21,9 +21,12 @@ void handle_api(yhsRequest *re) {
     yhsMethod method;
     char buf[BUF_LEN+1];
 
+    /* Debug */
+    printf("Received request request %s /api/gpio/%s!\n", yhs_get_method_str(re), yhs_get_path_handler_relative(re));
+
     /* get the gpio pin number */
     gpio_pin_str = yhs_get_path_handler_relative(re);
-    printf("%s\n", gpio_pin_str);
+    printf("Request GPIO pin %s\n", gpio_pin_str);
     x = atoi(gpio_pin_str);
     if (x < 0 || x > 256) return;
     gpio = (uint8_t)x;
@@ -66,10 +69,8 @@ void handle_api(yhsRequest *re) {
             yhs_textf(re, "%u", val);
         }
         break;
-    case YHS_METHOD_OTHER:
-        /* not PATCH request */
-        if (strncmp(yhs_get_method_str(re), "PATCH", 5)) return;
-
+    case YHS_METHOD_PATCH:
+        /* PATCH value of the GPIO pin */
         /* read body */
         yhs_get_content(re, BUF_LEN, buf);
         buf[BUF_LEN] = '\0';
@@ -107,6 +108,7 @@ void handle_api(yhsRequest *re) {
     default:
         break;
     }
+    printf("Done handling request!\n");
 }
 
 int main(int argc, char **argv) {
@@ -138,6 +140,7 @@ haveport:
     /* create server */
     server = yhs_new_server(port);
     yhs_set_server_name(server, "rpigpio");
+    yhs_set_server_log_enabled(server, YHS_LOG_DEBUG, 1);
 
     /* add handlers */
     yhs_add_res_path_handler(server,"/api/gpio/",&handle_api,NULL);
