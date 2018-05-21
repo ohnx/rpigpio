@@ -1,6 +1,5 @@
 CC ?= gcc
-CFLAGS += -I. -Wall -Werror -O3
-FILES = rpigpio.c
+CFLAGS += -I. -Wall -Werror -O0 -g
 OUTPUT = rpigpio
 ifdef TARGET
 SUFFIX = -$(TARGET)
@@ -10,7 +9,7 @@ endif
 
 
 # rest of the files are c99 (with GNU extensions)
-$(OUTPUT): $(FILES) libgpio$(SUFFIX).o yhs$(SUFFIX).o
+$(OUTPUT)$(SUFFIX): rpigpio.c libgpio$(SUFFIX).o yhs$(SUFFIX).o
 	$(CC) $^ $(CFLAGS) -std=gnu99 -o $(OUTPUT)$(SUFFIX)
 
 # libgpio.c is ansi C

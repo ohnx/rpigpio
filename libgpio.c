@@ -77,7 +77,7 @@ static int _libgpio_setdir(uint8_t gpio, uint8_t dir) {
     /* open the file for writing */
     n = sprintf(buf, "/sys/class/gpio/gpio%u/direction", gpio);
     fd = open(buf, O_WRONLY);
-    /* attribute does not exist, kernel doesn't support changing direction */
+    /* attribute does not exist, kernel doesn't support changing direction, no permission */
     if (fd == -1) return LIBGPIO_RET_SETGPIODIR_FAIL;
 
     /* write the appropriate message */
@@ -91,11 +91,11 @@ static int _libgpio_setdir(uint8_t gpio, uint8_t dir) {
 }
 
 /**
- * @fn int libgpio_write(uint8_t gpio, uint8_t value)
+ * @fn int libgpio_write(uint8_t gpio, uint8_t value, uint8_t keepexported)
  * @brief Sets the GPIO value
  * @param gpio  The GPIO pin number whose value will be set
  * @param value The value of the pin to set (0 or 1)
- * @param keepexported  Whether or not to keep this pin exported to userspace
+ * @param keepexported  Whether or not to keep this pin exported to userspace (mandatory if pin is set to high)
  * @return LIBGPIO_RET_OK if no errors occurred; appropriate error code otherwise
  * 
  * This function sets the value of a given GPIO pin.
@@ -104,7 +104,6 @@ int libgpio_write(uint8_t gpio, uint8_t value, uint8_t keepexported) {
     static char buf[30];
     const char *f = "01";
     ssize_t n;
-    uint8_t gpio_mode;
     int fd, r;
 
     /* input sanity check */
@@ -116,81 +115,92 @@ int libgpio_write(uint8_t gpio, uint8_t value, uint8_t keepexported) {
     /* check if the gpio is already exported */
     if (access(buf, F_OK))
         /* not already exported, let us try exporting it now... */
-        if (!(r = _libgpio_rwfile(gpio, _LIBGPIO_MODE_EXPORT)))
+        if ((r = _libgpio_rwfile(gpio, _LIBGPIO_MODE_EXPORT)))
             /* failed to export */
             return r;
 
-    /* check if we can write to the gpio value */
-    if (access(buf, W_OK)) {
-        /* not able to write, let us try enabling writing now... */
-        if (value) gpio_mode = _LIBGPIO_MODE_HIGH;
-        else gpio_mode = _LIBGPIO_MODE_LOW;
-        if (!(r = _libgpio_setdir(gpio, gpio_mode)))
-            /* failed to enable writes */
-            return r;
-    }
+    /* set the gpio to write mode */
+    if ((r = _libgpio_setdir(gpio, _LIBGPIO_MODE_OUT)))
+        /* failed to enable writes */
+        goto cleanup;
 
     /* open the file */
     fd = open(buf, O_WRONLY);
     /* No permission to write??? not sure why this would fail */
-    if (fd == -1) return LIBGPIO_RET_SETGPIO_FAIL;
+    if (fd == -1) { r = LIBGPIO_RET_SETGPIO_FAIL; goto cleanup; }
 
     /* write the value! */
     n = write(fd, f + value, 1);
     /* No permission to write??? not sure why this would fail */
-    if (n == -1) return LIBGPIO_RET_SETGPIO_FAIL;
+    if (n == -1) { r = LIBGPIO_RET_SETGPIO_FAIL; goto cleanup; }
 
     /* done */
     close(fd);
+    r = LIBGPIO_RET_OK;
 
+cleanup:
     /* check if we want to keep the pin exported */
-    if (!keepexported)
+    if (!keepexported && !value)
         _libgpio_rwfile(gpio, _LIBGPIO_MODE_UNEXPORT); /* idc if this errors */
 
-    return LIBGPIO_RET_OK;
+    return r;
 }
 
+/**
+ * @fn int libgpio_read(uint8_t gpio, uint8_t *value, uint8_t keepexported)
+ * @brief Reads the GPIO value
+ * @param gpio  The GPIO pin number whose value will be set
+ * @param value A pointer to the area to store the value of the pin
+ * @param keepexported  Whether or not to keep this pin exported to userspace (will not change if the pin was already exported)
+ * @return LIBGPIO_RET_OK if no errors occurred; appropriate error code otherwise
+ * 
+ * This function reads the value of a given GPIO pin.
+ */
 int libgpio_read(uint8_t gpio, uint8_t *value, uint8_t keepexported) {
     static char buf[30];
     ssize_t n;
     int fd, r;
+    uint8_t exported = 0;
 
     /* build output file name */
     n = sprintf(buf, "/sys/class/gpio/gpio%u/value", gpio);
 
     /* check if the gpio is already exported */
-    if (access(buf, F_OK))
+    if (access(buf, F_OK)) {
         /* not already exported, let us try exporting it now... */
-        if (!(r = _libgpio_rwfile(gpio, _LIBGPIO_MODE_EXPORT)))
+        if ((r = _libgpio_rwfile(gpio, _LIBGPIO_MODE_EXPORT)))
             /* failed to export */
             return r;
+    } else { exported = 1; }
 
     /* check if we can read the gpio value */
     if (access(buf, R_OK))
         /* not able to read, let us try enabling reading now... */
-        if (!(r = _libgpio_setdir(gpio, _LIBGPIO_MODE_IN)))
-            /* failed to enable writes */
-            return r;
+        if ((r = _libgpio_setdir(gpio, _LIBGPIO_MODE_IN)))
+            /* failed to enable reads */
+            goto cleanup;
 
     /* open the file */
     fd = open(buf, O_RDONLY);
-    /* No permission to write??? not sure why this would fail */
-    if (fd == -1) return LIBGPIO_RET_READGPIO_FAIL;
+    /* No permission to read??? not sure why this would fail */
+    if (fd == -1) { r = LIBGPIO_RET_READGPIO_FAIL; goto cleanup; }
 
-    /* write the value! */
+    /* read the value! */
     n = read(fd, buf, 3);
-    /* No permission to write??? not sure why this would fail */
-    if (n == -1) return LIBGPIO_RET_READGPIO_FAIL;
+    /* No permission to read??? not sure why this would fail */
+    if (n == -1) { r = LIBGPIO_RET_READGPIO_FAIL; goto cleanup; }
 
     /* done */
     close(fd);
 
     /* parse out the value we read */
     *value = *buf - '0';
+    r = LIBGPIO_RET_OK;
 
+cleanup:
     /* check if we want to keep the pin exported */
-    if (!keepexported)
+    if (!keepexported && !exported)
         _libgpio_rwfile(gpio, _LIBGPIO_MODE_UNEXPORT); /* idc if this errors */
 
-    return LIBGPIO_RET_OK;
+    return r;
 }
