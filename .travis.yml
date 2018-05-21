@@ -10,9 +10,9 @@ deploy:
   api_key:
     secure: jpekEBfKXq/RLQ5/0WY/rucXIeR4dUA9f9hbdk+MqfA6Id5Bs371F6Ud1+27zH7mX+XqA0lRXQh08giV9Ie06gbnglkO9bll1Qgg9mlK9KSYioRH+lok4a+aaexi23o+0r7dhu1IYf1lvSKognS1xrq/wi9IkB35JXdGXoY3i2JV5KDtUEnZUKZW0dDHTvE1FptuLYnEPY3KDHncq7nv9SF+nezqjl+fkESCvBzB+chv6FTm++RH7mqUiXHSRC8GNym3YqBgdxerILOKBGWQ4kxKNiHrs1gVpDrojh7SJrmRdVqnnFuhO8KVL0WIq7sz+dZwPKUKe6pXV4ojcRa4gIjHrKpoNsZ+zooh/toU3dsLVc8HO4FsvNkJ2aHKGsEIm0EhwzYrNAfzo/xNyCON7VpNmhtlh+jeNfHxxpekb7LURbf4PquKpBBjX4IVmfvnRs0uysmc0k2ucTFaQIW9nmCIJ3Z6Q0RYJJv8kHDPA+Y8bA8ZKAgF8J4gFi/J7F2WPlxiUG7FpjZOAPzVv897TsjMwnyx4Pk8hrQ0PecdTOplZGDLZHV166ksDY/S8eyM+n6ms4mkPVUsyqbau2REWRq61TjU9YdmzsAH9FalIy5hziMKCw03r8oHoKAvS4HW2Jk27nTh19mCsowzCwCjowP6xIiMJGtvpBDNWHjt7hQ=
   file:
-  - rpigpio
-  - libgpio.a
-  - libgpio.so
+    - rpigpio
+    - libgpio.a
+    - libgpio.so
   on:
     repo: ohnx/rpigpio
     tags: true
