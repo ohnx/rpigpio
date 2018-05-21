@@ -2,11 +2,14 @@
 #ifndef __LIBGPIO_INC
 #define __LIBGPIO_INC
 
-/* snprintf() */
+/* sprintf() */
 #include <stdio.h>
 /* ssize_t */
 #include <sys/types.h>
-/* open(), write(), close(), access() */
+/* open() */
+#include <sys/stat.h>
+#include <fcntl.h>
+/* write(), close(), access() */
 #include <unistd.h>
 
 /* No error */

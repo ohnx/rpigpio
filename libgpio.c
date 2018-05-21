@@ -34,8 +34,8 @@ static int _libgpio_rwfile(uint8_t gpio, uint8_t mode) {
 	if (fd == -1) return LIBGPIO_RET_KERNREQ_FAIL;
 
     /* write out the gpio number */
-	n = snprintf(buf, 4, "%u", gpio);
-	/* note: snprintf returns the length of string written without null; */
+	n = sprintf(buf, "%u", gpio);
+	/* note: sprintf returns the length of string written without null; */
 	/* the system API is expecting the string without a null terminator too. */
 	n = write(fd, buf, n);
 	/* nonexistent GPIO pin??? not sure why this would fail */
@@ -67,7 +67,7 @@ static int _libgpio_setdir(uint8_t gpio, uint8_t dir) {
     int fd;
 
     /* map input to correct string */
-    switch (mode) {
+    switch (dir) {
     case _LIBGPIO_MODE_IN: nf = 2; break;
     case _LIBGPIO_MODE_OUT: f += 2; nf = 3; break;
     case _LIBGPIO_MODE_LOW: f += 5; nf = 3; break;
@@ -75,7 +75,7 @@ static int _libgpio_setdir(uint8_t gpio, uint8_t dir) {
     }
 
     /* open the file for writing */
-    n = snprintf(buf, 34, "/sys/class/gpio/gpio%u/direction", gpio);
+    n = sprintf(buf, "/sys/class/gpio/gpio%u/direction", gpio);
     fd = open(buf, O_WRONLY);
     /* attribute does not exist, kernel doesn't support changing direction */
     if (fd == -1) return LIBGPIO_RET_SETGPIODIR_FAIL;
@@ -111,7 +111,7 @@ int libgpio_write(uint8_t gpio, uint8_t value, uint8_t keepexported) {
     if (value > 1) return LIBGPIO_RET_INVALIDIN;
 
     /* build output file name */
-    n = snprintf(buf, 30, "/sys/class/gpio/gpio%u/value", gpio);
+    n = sprintf(buf, "/sys/class/gpio/gpio%u/value", gpio);
 
     /* check if the gpio is already exported */
     if (access(buf, F_OK))
@@ -136,7 +136,7 @@ int libgpio_write(uint8_t gpio, uint8_t value, uint8_t keepexported) {
     if (fd == -1) return LIBGPIO_RET_SETGPIO_FAIL;
 
     /* write the value! */
-    n = write(fd, f[value], 1);
+    n = write(fd, f + value, 1);
     /* No permission to write??? not sure why this would fail */
     if (n == -1) return LIBGPIO_RET_SETGPIO_FAIL;
 
@@ -156,7 +156,7 @@ int libgpio_read(uint8_t gpio, uint8_t *value, uint8_t keepexported) {
     int fd, r;
 
     /* build output file name */
-    n = snprintf(buf, 30, "/sys/class/gpio/gpio%u/value", gpio);
+    n = sprintf(buf, "/sys/class/gpio/gpio%u/value", gpio);
 
     /* check if the gpio is already exported */
     if (access(buf, F_OK))
@@ -186,7 +186,7 @@ int libgpio_read(uint8_t gpio, uint8_t *value, uint8_t keepexported) {
     close(fd);
 
     /* parse out the value we read */
-    value = *buf - '0';
+    *value = *buf - '0';
 
     /* check if we want to keep the pin exported */
     if (!keepexported)
