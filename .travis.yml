@@ -15,3 +15,4 @@ deploy:
   - libgpio.so
   on:
     repo: ohnx/rpigpio
+    tags: true
