@@ -13,6 +13,7 @@ deploy:
     - rpigpio
     - libgpio.a
     - libgpio.so
+  skip_cleanup: true
   on:
     repo: ohnx/rpigpio
     tags: true
